@@ -1,0 +1,147 @@
+#Question: Get all the products from the Market
+SELECT * FROM farmer_market.product;
+
+#Question: Get only first 5 products from the Market
+SELECT * FROM farmer_market.product
+LIMIT 5;
+
+#Question: Get prd_id, name column and list 5 products from the Market
+SELECT product_id, product_name, product_category_id,
+FROM farmer_market.product
+limit 5;
+
+#Question: Get prd_id, name column and list 5 products from the Market in desc
+SELECT product_id, product_name, product_category_id,
+FROM farmer_market.product
+ORDER BY product_id Desc
+limit 5;
+
+#Question: In the customer purchases, we have quantity and cost per qty separate, query the total 
+#amount that the customer has paid along with date, customer id, vendor_id, qty, cost per qty and #the total amt.?
+SELECT
+market_date, 
+customer_id, 
+vendor_id, 
+quantity, 
+cost_to_customer_per_qty,
+ROUND(quantity * cost_to_customer_per_qty, 2)  AS Total_amount 
+from `farmer_market.customer_purchases`;
+
+#Question: Get all the products purchased by customer_id 4, and sort by market_date, vendor id, product id
+SELECT
+*
+FROM `farmer_market.customer_purchases`
+WHERE customer_id=4
+ORDER BY market_date, vendor_id, product_id;
+
+SELECT *
+FROM `farmer_market.product`
+WHERE (product_id BETWEEN 3 AND 8) OR product_id = 10;
+
+#Updating product_table with NULL value
+UPDATE farmer_market.product SET product_size = NULL 
+WHERE product_id = 14;
+
+#Question: Find the details of purchases made by cu 4 at vendor 7
+SELECT 
+ROUND(quantity * cost_to_customer_per_qty, 2) as Total,
+vendor_id,
+customer_id,
+market_date
+from farmer_market.customer_purchases
+WHERE customer_id = 4 AND vendor_id = 7
+ORDER BY market_date desc;
+
+
+#Question: find booth assignments for vendor 7 for any market that occured btwn April 3, 2019 and May 16, 2019
+SELECT *
+FROM `farmer_market.vendor_booth_assignments`
+WHERE vendor_id = 7 AND market_date BETWEEN "2019-04-03" AND "2019-05-16"
+ORDER BY market_date;
+
+##INCLAUSE
+#Return  a list of name whose last name is eithe Diaz or Edwards or Wilson
+SELECT *
+FROM `farmer_market.customer`
+WHERE customer_last_name = "Diaz" OR
+customer_last_name = "Edwards" OR
+customer_last_name = "Wilson";
+
+#But if there are 200 datas needed, USES INCLAUSE
+SELECT *
+FROM `farmer_market.customer`
+WHERE customer_last_name IN ("Diaz", "Edwards", "Wilson");
+
+#qn: get data abt customer first name starts with any letter and 'A' in second position and last_name ends with 'e'
+SELECT *
+FROM `farmer_market.customer`
+WHERE customer_first_name like '_a%'
+AND
+customer_last_name like '%e';
+
+#NULL ISSUES
+SELECT *
+FROM `farmer_market.product`
+WHERE product_size is NULL;
+
+#COELESCE AND IFNULL
+##COELESCE - TRY TO SUPPRESS null SYNTAX:coelesce(column, repace_arg1_if_columnisNull, replace_arg2_if_arg1_is_null)
+
+##IFNULL - replace null with mentioned string or argument
+#SYNTAX:IFNULL(column, repace_arg1_if_columnisNull)
+
+#SUBQUERY
+#qn: Analyse the purchase made at the farmer's market on days when it rained
+select *
+from farmer_market.product;
+#from both the abv tables, common field is prod_cat_id so
+select 
+  product_id,
+  product_name,
+FROM `farmer_market.product`
+WHERE product_category_id IN (
+  SELECT product_category_id
+  FROM `farmer_market.product_category`
+  WHERE product_category_name like '%Fresh%'
+);
+
+#PROBLEM STATEMENT
+#Display the details of all the employees whose dept location is in Seattle.
+#Return the columns 'first_name', 'last_name', 'employee_id', and 'job_id'
+#Use the tables employees, departments and locations
+
+#employees -> departments ->  locations
+SELECT * FROM `Employee_Schema.employees`;
+SELECT * FROM `Employee_Schema.locations`;
+SELECT * FROM `Employee_Schema.departments`;
+SELECT 
+  first_name,
+  last_name,
+  employee_id,
+  department_id,
+  job_id,
+FROM `Employee_Schema.employees` WHERE department_id IN (
+  SELECT department_id FROM `Employee_Schema.departments` WHERE location_id IN (
+    SELECT location_id FROM `Employee_Schema.locations` WHERE city = 'Seattle'
+  )
+);
+
+#CASE STATEMENTS---
+#CASE
+#   when (1st_condition)
+#   then (do this)
+#   when (2nd_conditon)
+#   then (do that)
+#ELSE (if+non of them is true_EXECUTE_THIS) 
+#END 
+#as case_column ------->dynamic column will be created
+
+#Question: Find out which vendors primarily sell fresh produce and which don’t.
+SELECT 
+vendor_name,
+vendor_type,
+  CASE
+    WHEN vendor_type like "Fresh%" THEN 'Fresh_Produce'
+  ELSE "Other"
+  END AS vendor_type_classification
+FROM `farmer_market.vendor`;
